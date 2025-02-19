@@ -6,9 +6,11 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Checkbox } from "react-native-paper";
 
 const iniTasks = [
   { title: "Task 1", subTitle: "This is a description of Task 1", id: 1 },
@@ -18,18 +20,43 @@ const iniTasks = [
   { title: "Task 5", subTitle: "This is a description of Task 5", id: 5 },
 ];
 
-const Items = ({ title, subTitle }) => (
-  <View style={Styles.itemContainer}>
-    <Text style={Styles.itemTitle}>{title}</Text>
-    <Text style={Styles.itemSubTitle}>{subTitle}</Text>
-  </View>
-);
+const Items = ({ title, subTitle ,id,onDelete}) => {
+  const [checked, setChecked] = useState(false);
+  const handleCheck = () => {
+    const newChecked = !checked; 
+    setChecked(newChecked);
+  
+    ToastAndroid.show(
+      `${title} has been ${newChecked ? 'completed' : 'uncompleted yet'}`, 
+      ToastAndroid.SHORT
+    );
+  };
+
+  return (
+    <View style={Styles.itemContainer}>
+      <View>
+        <Text style={Styles.itemTitle}>{title}</Text>
+        <Text style={Styles.itemSubTitle}>{subTitle}</Text>
+      </View>
+      <View style={{ flexDirection: "row",alignItems:"center", justifyContent: "center" }}>
+        <Checkbox
+          status={checked ? "checked" : "unchecked"}
+          onPress={() => handleCheck()}
+        />
+        <TouchableOpacity style={Styles.button1} onPress={()=> onDelete(id,title)} >
+            <Text style={Styles.buttonText1}>Delete</Text>
+          </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 const TaskList = () => {
   const [tasks, setTasks] = useState(iniTasks);
   const [modal, setModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newSubTitle, setNewSubTitle] = useState("");
+  
   const addTask = () => {
     if (newSubTitle && newTitle) {
       const newTask = {
@@ -43,8 +70,15 @@ const TaskList = () => {
       setModal(false);
     }
   };
+  const deleteTask = (id,title) => {
+    setTasks(tasks.filter(task=>task.id !== id));
+    ToastAndroid.show(
+      ` ${title} has been deleted`, 
+      ToastAndroid.SHORT
+    );
+  };
   const renderItem = ({ item }) => (
-    <Items title={item.title} subTitle={item.subTitle} />
+    <Items title={item.title} subTitle={item.subTitle} id={item.id} onDelete={deleteTask}  />
   );
 
   return (
@@ -119,6 +153,8 @@ const Styles = StyleSheet.create({
     textAlign: "center",
   },
   itemContainer: {
+    justifyContent: "space-between",
+    flexDirection: "row",
     backgroundColor: "#fff",
     padding: 15,
     marginVertical: 8,
@@ -177,6 +213,20 @@ const Styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
+
+    fontWeight: "bold",
+  },
+  button1: {
+    backgroundColor: "red",
+    padding: 5,
+    borderRadius: 5,
+    marginTop: 5,
+    width: "35%",
+    alignItems: "center",
+  },
+  buttonText1: {
+    color: "white",
+   
     fontWeight: "bold",
   },
 });
